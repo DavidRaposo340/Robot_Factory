@@ -249,6 +249,73 @@ void imanOn(uint8_t on){
   return;
 }
 
+
+///////////////////////////////////////////////////
+//PID
+ uint8_t ERRO, ERRO_anterior=0, lado;  //ERRO PID / lado=1 vira direita; lado=0 vira esquerda
+ uint8_t ki=0 , kp=50 , kd=40;  
+ uint8_t I , P , D, PID;
+ uint8_t vel_esq, vel_dir;  
+ uint8_t vel_base=40;  
+ uint8_t angulo=0;  
+ 
+void calcular_PID(){
+
+  ERRO=angulo;
+
+  
+  if (ERRO==0)  I=0;
+
+  P=ERRO;
+  I=I+ERRO;
+  if (I>100)  I=100;
+  else if (I<-100)  I=-100;
+  D=ERRO- ERRO_anterior;
+  PID=(kp* (P*0.1) )+ (ki* (I*0.1) )+ (kd* (D*0.1) );
+  //PID=(kp* (P) )+ (ki* (I) )+ (kd* (D) );
+  ERRO_anterior=ERRO; 
+
+}
+
+
+
+void move_forward(){
+  
+    calcular_PID();
+    vel_esq= vel_base + PID;
+    vel_dir= vel_base - PID;
+
+    if(vel_esq>0)
+      motor_esquerda(vel_esq, 1);
+    else  
+      motor_esquerda(-vel_esq, 0);
+
+    if(vel_dir>0)
+      motor_direita(vel_dir, 1);
+    else  
+      motor_direita(-vel_dir, 0);
+
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void rotate(){
+    calcular_PID();
+    vel_esq= PID;
+    vel_dir= -PID;
+
+    if(vel_esq>0)
+      motor_esquerda(vel_esq, 1);
+    else  
+      motor_esquerda(-vel_esq, 0);
+
+    if(vel_dir>0)
+      motor_direita(vel_dir, 1);
+    else  
+      motor_direita(-vel_dir, 0);
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -336,8 +403,8 @@ int main(void)
     
     
     //ATIVAÇAO DE MOTORES e outras saidas
-    frente        (  state_FSM1==10   );
-    vira_dir      (  state_FSM1==20    );
+    frente        (  state_FSM1==1   );
+    vira_dir      (  state_FSM1==2   );
     vira_forte_dir(  0    );
     vira_esq_tras (  0    );
     tras          (  0    );
